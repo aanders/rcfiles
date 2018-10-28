@@ -1,0 +1,173 @@
+" vim settings
+
+" === Plugin Manager ===
+" Use Vundle as the plugin manager.  Plugins are also configured in this file.
+source ~/.vim/vundle.vim
+
+" === Editor Setup ===
+
+" Colorscheme
+if has('gui_running')
+    colorscheme evening
+elseif (&t_Co == 256)
+    " 256-color support
+    colorscheme evening
+else
+    " 8 colors :(
+    colorscheme default
+endif
+
+filetype plugin indent on
+syntax enable
+
+" === Set preferred default options ===
+" These may be overridden by filetype plugins as needed/desired.
+
+set clipboard=unnamedplus
+set colorcolumn=80
+set completeopt=menu,preview    " Insert mode completion behavior
+set cursorline
+set dictionary+=/usr/share/dict/words
+set expandtab
+set foldmethod=marker
+set hlsearch
+set incsearch
+" set ignorecase    " case insensitive search (see 'smartcase')
+set laststatus=2    " Always show the status line, even if only one window
+set mouse=a
+set number
+set scrolloff=2
+set shiftwidth=4
+set showmatch
+" set smartcase     " switch to case sensitive search if capital letters
+set softtabstop=4
+set switchbuf=useopen,usetab
+set tabstop=8
+set tags+=.tags,.TAGS, " Look for hidden tag files
+
+" Use background color to redraw screen
+" see https://sunaku.github.io/vim-256color-bce.html
+set t_ut=
+
+" Ignore during tab completion
+set wildignore+=*.class             " Java
+set wildignore+=*.o,*.so,*.a,tags   " C/C++
+set wildignore+=*.pyc               " Python
+set wildignore+=*.swp,._*,#*#,*~    " Backup files
+
+set wildmenu    " Use a menu-like interface for command line completion
+set wildmode=full
+
+" === Key bindings and custom mappings ===
+
+" If you forgot to open the file with sudo, escalate privilege and then write
+" it indirectly (see http://stackoverflow.com/a/7078429)
+cmap w!! w !sudo tee > /dev/null %
+
+" Insert word under the cursor into the command line
+cnoremap +w <C-r>=expand('<cword>')<CR>
+
+" Cscope navigation shortcuts
+nnoremap <C-_>a :cscope add .cscope/cscope.out
+nnoremap <C-_>C :cscope find c<Space>
+nnoremap <C-_>c :cscope find c <C-r>=expand('<cword>')<CR><CR>
+nnoremap <C-_>G :cscope find g<Space>
+nnoremap <C-_>g :cscope find g <C-r>=expand('<cword>')<CR><CR>
+nnoremap <C-_>S :cscope find s<Space>
+nnoremap <C-_>s :cscope find s <C-r>=expand('<cword>')<CR><CR>
+nnoremap <C-_>T :cscope find t<Space>
+nnoremap <C-_>t :cscope find t <C-r>=expand('<cword>')<CR><CR>
+
+" Clear search highlighting quickly
+nnoremap <silent> <CR> :nohl<CR><CR>
+
+" Switch to the last active tab. g:lasttab is updated by TabLeave autocmd
+let g:lasttab = tabpagenr()
+nnoremap <silent> gl :exe "tabn ".g:lasttab<CR>
+
+" Switch between absolute and relative numbering
+nnoremap <silent> <C-n> :call ToggleLineNumberType()<CR>
+
+" Code formatting
+nnoremap <silent> <Leader>f :call ClangFormat()<CR>
+vnoremap <silent> <Leader>f :call ClangFormat()<CR>
+
+" Uppercase from beginning of word to cursor while in Insert mode
+" To uppercase the entire word regardless of cursor position, use 'viw' instead
+inoremap UU <Esc>m`vbU``a
+
+" Comment shortcut (depends on the 'commentary' plugin by tpope)
+nmap - gcc
+vmap - gc
+
+" === Custom Functions ===
+
+" Disable automatic Clang formatting on save by default
+let g:auto_clang_format_enable = 0
+
+function! ClangFormatBuffer()
+    let l:lines = "all"
+    let l:formatdiff = 1
+    if g:auto_clang_format_enable
+        pyf /usr/share/clang/clang-format-3.9/clang-format.py
+    endif
+endfunction
+
+function! ClangFormat()
+    if &filetype == "c" || &filetype == "cpp"
+        pyf /usr/share/clang/clang-format-3.9/clang-format.py
+    else
+        echoerr "clang-format: Not a C/C++ source file!"
+    endif
+endfunction
+
+function! CompileLatex()
+    silent! !pdflatex -interaction=batchmode % > /dev/null 2>&1
+    if v:shell_error
+        echohl ErrorMsg
+        echo "LaTeX compilation failed."
+        echohl None
+    endif
+endfunction
+
+function! ToggleLineNumberType()
+    if &relativenumber
+        setlocal norelativenumber
+    else
+        setlocal relativenumber
+    endif
+endfunction
+
+" === Autocommands ===
+
+augroup vimrc_autocmds
+    autocmd!
+
+    " md is definitely not modula2 >_>
+    autocmd BufNewFile,BufRead *.md set filetype=markdown
+
+    " clang-format is a YAML file
+    autocmd BufNewFile,BufRead .clang-format set filetype=yaml
+
+    " Trailing whitespace is generally bad (or at least invisible)
+    autocmd WinEnter,BufEnter,InsertLeave * match Error /\s\+$/
+
+    " Save last active tab
+    autocmd TabLeave * let g:lasttab = tabpagenr()
+
+    " Auto-format C source files on save if enabled (see
+    " g:auto_clang_format_enable declared above)
+    autocmd BufWritePre *.c,*.h,*.cc,*.cpp call ClangFormatBuffer()
+
+    " Compile LaTeX files on save
+    autocmd BufWritePost *.tex call CompileLatex()
+augroup END
+
+" === Miscellaneous ===
+
+" Provide a way to specify custom vim settings for a particular folder or
+" project.  This should come LAST so local vimrc settings take precedence
+if filereadable("./.vimrc")
+    " Source local vimrc if exists
+    source ./.vimrc
+endif

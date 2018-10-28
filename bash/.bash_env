@@ -1,0 +1,11 @@
+# .bash_env
+#
+# Set bash environment variables, including PATH
+# This file should be sourced at the end of ${HOME}/.bashrc
+
+export EDITOR=vim
+export VISUAL=vim
+export SUDO_EDITOR=rvim
+export HISTCONTROL=ignorespace # commands beginning with space bypass history
+
+export PATH="$PATH:$HOME/bin"
