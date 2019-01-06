@@ -13,3 +13,7 @@ alias la="ls -lha"
 alias rm="rm -i"
 alias mv="mv -i"
 alias cp="cp -i"
+
+# Necessary on Fedora to launch terminal Vim with clipboard support
+alias vi='gvim -v'
+alias vim='gvim -v'
