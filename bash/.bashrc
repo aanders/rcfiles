@@ -39,6 +39,10 @@ fi
 # Disable terminal flow control
 stty -ixon -ixoff
 
+# Load bash completions
+load_completion_src=/usr/share/bash-completion/bash_completion
+[[ -f "$load_completion_src" ]] && source $load_completion_src
+
 [[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
 
 [[ -f ~/.bash_env ]] && source ~/.bash_env
