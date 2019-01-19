@@ -13,3 +13,6 @@ ${GIT} config --global alias.sst    "submodule status"
 ${GIT} config --global alias.sup    "submodule update"
 ${GIT} config --global alias.last   "show --stat HEAD"
 ${GIT} config --global alias.t      "log --graph --decorate --oneline --branches"
+
+# git-refresh-tags.sh can be found under the bin folder
+${GIT} config --global alias.refresh-tags "!git-refresh-tags.sh"
