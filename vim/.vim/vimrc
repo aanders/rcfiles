@@ -1,8 +1,21 @@
 " vim settings
 
+" === Pre-configuration checks ===
+function! IsRestrictedMode()
+    try
+        silent call system("true")
+    catch /^Vim(call):E145:/
+        return 1
+    endtry
+    return 0
+endfunction
+
 " === Plugin Manager ===
 " Use Vundle as the plugin manager.  Plugins are also configured in this file.
-source ~/.vim/vundle.vim
+" Do not attempt to load any plugins in restricted mode.
+if !IsRestrictedMode()
+    source ~/.vim/vundle.vim
+endif
 
 " === Editor Setup ===
 
