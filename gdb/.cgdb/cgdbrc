@@ -1,0 +1,13 @@
+# ~/.cgdb/cgdbrc
+#
+# CGDB configuration file
+
+# Place source window and debugging window side-by-side
+set winsplitorientation=vertical
+
+# Automatically exit GDB mode when using F5, F6, etc.
+imap <F5> <Esc><F5>
+imap <F6> <Esc><F6>
+imap <F7> <Esc><F7>
+imap <F8> <Esc><F8>
+imap <F10> <Esc><F10>
