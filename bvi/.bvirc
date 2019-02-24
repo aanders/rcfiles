@@ -1,0 +1,7 @@
+# ~/.bvirc
+#
+# bvi configuration file
+#
+# http://bvi.sourceforge.net
+
+set columns=16
