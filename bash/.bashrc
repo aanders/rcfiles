@@ -46,3 +46,9 @@ load_completion_src=/usr/share/bash-completion/bash_completion
 [[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
 
 [[ -f ~/.bash_env ]] && source ~/.bash_env
+
+# Private or system-specific definitions can be placed here
+[[ -f ~/.bash_private ]] && source ~/.bash_private
+
+# Ensure $? = 0 otherwise the initial prompt displays the nonzero rc
+true
