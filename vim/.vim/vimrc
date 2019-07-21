@@ -113,6 +113,10 @@ inoremap UU <Esc>m`vbU``a
 nmap - gcc
 vmap - gc
 
+" Insert blank lines without leaving normal mode
+nnoremap oo o<Esc>
+nnoremap OO O<Esc>
+
 " === Custom Functions ===
 
 " Disable automatic Clang formatting on save by default
