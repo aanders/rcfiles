@@ -20,7 +20,7 @@ function last_rc() {
         echo "$? "
     fi
 }
-PS1="\[${txtred}\]\$(last_rc)\[${bldylw}\]\u\[${txtylw}\] \W\[${txtcyn}\]\$(git_branch)\[${txtred}\]\$(git_dirty)\[${txtrst}\]\$ "
+PS1="\[${txtred}\]\$(last_rc)\[${bldylw}\]\u@\h\[${txtylw}\] \W\[${txtcyn}\]\$(git_branch)\[${txtred}\]\$(git_dirty)\[${txtrst}\]\$ "
 
 # Set colors and color support
 
