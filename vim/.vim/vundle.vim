@@ -130,7 +130,12 @@ Plugin 'mkitt/tabline.vim'
 
 " === Language plugins ===
 
+" Rust
 Plugin 'rust-lang/rust.vim'
+Plugin 'racer-rust/vim-racer'
+let g:racer_experimental_completer = 1
+
+" Go
 Plugin 'fatih/vim-go'
 
 call vundle#end()
