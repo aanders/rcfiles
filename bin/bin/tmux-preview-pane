@@ -1,0 +1,186 @@
+#!/bin/bash
+#
+# Copyright 2020 Aaron Anderson <developer@aaanders.com>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+# tmux-preview-pane v0.1.0
+#
+# Implement a pop-up "preview" pane in tmux.
+#
+# The tmux-preview-pane script can be used to control a "pop-up" pane at
+# the bottom of a tmux window.  This pane is named after Vim's preview window,
+# and is intended to be a temporary place to view reference material, execute
+# one-off commands, and more.  Like Vim's preview window, there is a limit of
+# one preview pane per tmux window; attempts to launch a new command in a
+# preview pane when the window already has a preview pane open will cause the
+# existing preview pane to kill its current process and respawn with the new
+# command.
+#
+# Example usage of this script for tmux configuration:
+#
+#   bind-key C-t run-shell "tmux-preview-pane open bash"
+#   bind-key C-k command-prompt -p "(man)" "run-shell 'tmux-preview-pane open man %%'"
+#   ...
+#   set-hook pane-died "run-shell 'tmux-preview-pane close -h #{hook_pane}'"
+#
+# Requires tmux 2.4 or greater.
+
+function preview_pane_id() {
+    # -q: No error if undefined
+    # -v: Show value only
+    # -w: Show window option
+    tmux show-option $target_window_opt -qvw @preview
+}
+
+function do_open() {
+
+    if [ -z "$1" ]; then
+        echo "ERROR: missing command for action 'open'" >&2
+        usage
+        exit 1
+    fi
+
+    local preview_id=$(preview_pane_id)
+
+    if [ -z "$preview_id" ]; then
+        # No existing preview pane
+
+        # -v: Vertical split (one pane on top of the other)
+        # -f: Split across the whole window
+        # -p: Percentage of window height to occupy
+        # -c: Working directory
+        tmux split-window $target_window_opt -vf -p 20 \
+            -c "#{pane_current_path}" $@
+
+        # preview pane is now active
+        # -F: Expand format placeholders
+        # -w: Set window option
+        tmux set-option $target_window_opt -Fw @preview "#{pane_id}"
+    else
+        # Repurpose the existing preview pane
+        # The pane ID does not change
+
+        # -k: Kill the existing process
+        # -c: Working directory
+        tmux respawn-pane -t $preview_id -k -c "#{pane_current_path}" $@
+
+        # respawn-pane does not focus the respawned pane, so we need to do that
+        # manually (open should always focus the preview pane when called).
+        do_focus
+    fi
+}
+
+function do_focus {
+    local preview_id=$(preview_pane_id)
+    if [ -n "$preview_id" ]; then
+        tmux select-pane -t $preview_id
+    fi
+}
+
+function do_close() {
+
+    local preview_id=
+
+    if [ "$1" = "-h" ]; then
+        shift
+        # hook target pane ID must be provided
+        if [ -z "$1" ]; then
+            echo "ERROR: -h requires argument" >&2
+            usage
+            exit 1
+        fi
+
+        local tmp=$(preview_pane_id)
+        if [ "$1" == "$tmp" ]; then
+            # target ID is in fact the preview pane
+            preview_id=$tmp
+        fi
+    else
+        # Close the pane as long as it exists
+        preview_id=$(preview_pane_id)
+    fi
+
+    if [ -n "$preview_id" ]; then
+        tmux kill-pane -t $preview_id
+        tmux set-option -uw $target_window_opt @preview ""
+
+    fi
+}
+
+
+function usage() {
+cat <<EOF >&2
+usage: $0 [-t <target-window>] <action> <action-options>
+
+Actions:
+  open <command> [arg [arg...]]
+        Open the preview pane (if not open already) and run the given command
+        with optional arguments.  Automatically moves focus to the preview pane.
+
+  focus
+        Move focus to the preview pane.  If not open, do nothing.
+
+  close [-h <hook_pane>]
+        Close the preview pane.  If not open, do nothing.  If -h is given,
+        only close the preview pane if it is the target of a running hook.
+        The target pane ID needs to be provided via the -h argument; once
+        inside the script, tmux loses the hook's contextual information.
+EOF
+}
+
+# MAIN #
+
+unset action
+unset target_window_opt
+
+while [ -n "$1" ]; do
+    case "$1" in
+        -t)
+            shift
+            if [ -z "$1" ]; then
+                echo "ERROR: -t requires argument" >&2
+                usage
+                exit 1
+            fi
+            # We embed the option switch so that if it's not set, it will
+            # be left out altogether without the need for extra logic.
+            target_window_opt="-t $1"
+            shift
+            ;;
+        open|focus|close)
+            action="$1"
+            shift
+            break
+            ;;
+        *)
+            echo "ERROR: '$1' is not a valid action" >&2
+            usage
+            exit 1
+    esac
+done
+
+if [ -z "$action" ]; then
+    echo "ERROR: no action specified" >&2
+    usage
+    exit 1
+fi
+
+do_$action $@
