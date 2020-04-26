@@ -17,3 +17,8 @@ alias cp="cp -i"
 # Necessary on Fedora to launch terminal Vim with clipboard support
 alias vi='gvim -v'
 alias vim='gvim -v'
+
+# Don't override an existing command or function
+if ! which open >/dev/null 2>&1; then
+    alias open=xdg-open
+fi
