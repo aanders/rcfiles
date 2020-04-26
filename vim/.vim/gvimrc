@@ -1,0 +1,63 @@
+" gvim settings
+"
+" General Vim settings are configured in .vim/vimrc
+" This file is for settings specific to the GUI
+
+" === GUI Window ===
+
+" guioptions
+"
+" Flags:
+"   !       External commands are executed in a terminal window
+"   a       Automatically yank text to "* when Visual mode ends
+"   P       Like 'a', but for "+
+"   A       Like 'a', but only for modeless selection
+"   c       Use console dialogs instead of popup windows for simple choices
+"   d       On GTK+, use dark theme (if available)
+"   e       Use a GUI-based tab line
+"   f       Don't fork() to detach GVim from the shell*
+"   i       Use a Vim icon
+"   m       Display the menu bar
+"   M       Don't source the menu.vim file*
+"   g       Inactive menu items are greyed out rather than hidden
+"   t       Tearoff menu items
+"   T       Display the toolbar
+"   r       Always display right-hand scrollbar
+"   R       Display right-hand scrollbar when window is vertically split
+"   l       Always display left-hand scrollbar
+"   L       Display left-hand scrollbar when window is vertically split
+"   b       Always display bottom scrollbar
+"   h       Limit bottom scrollbar range to the cursor line instead of the
+"           longest visible line
+"   v       Always use a vertical button layout for dialogs
+"   p       Use Pointer callbacks for X11 GUI (required for some window
+"           managers; must be set before the GUI is launched)
+"   F       Add a footer (only for Motif)
+"   k       Preserve GUI window size rather than 'lines' and 'columns' when
+"           adding or removing GUI components.
+"
+"   *Note: should be set in vimrc as gvimrc may not be read until after the
+"   operation has taken place
+"
+"   Instead of explicitly setting the entire 'guioptions' value, only flags
+"   that are specifically desired (or specifically NOT desired) are set here.
+"   This allows the preservation of default behavior for options we don't care
+"   about.
+set guioptions+=!
+set guioptions+=c
+set guioptions+=d
+set guioptions-=e
+set guioptions-=m
+set guioptions-=T
+set guioptions-=r
+set guioptions-=l
+
+set lines=45
+set columns=85
+
+if system("fc-list 'Source Code Pro Medium'") != ""
+    set guifont=Source\ Code\ Pro\ Medium\ 11
+endif
+
+" === Other GUI Behavior ===
+set guipty              " Try to use a pty for I/O to/from shell commands

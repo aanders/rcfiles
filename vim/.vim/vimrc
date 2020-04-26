@@ -51,6 +51,7 @@ set mouse=a
 set number
 set scrolloff=2
 set shiftwidth=4
+set showcmd         " show normal mode command prefixes in last line
 set showmatch
 " set smartcase     " switch to case sensitive search if capital letters
 set softtabstop=4
