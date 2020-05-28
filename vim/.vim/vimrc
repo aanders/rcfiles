@@ -122,18 +122,19 @@ nnoremap OO O<Esc>
 
 " Disable automatic Clang formatting on save by default
 let g:auto_clang_format_enable = 0
+let g:clang_format_script_file = "/usr/share/clang/clang-format.py"
 
 function! ClangFormatBuffer()
     let l:lines = "all"
     let l:formatdiff = 1
     if g:auto_clang_format_enable
-        pyf /usr/share/clang/clang-format-3.9/clang-format.py
+        execute "py3f " . fnameescape(g:clang_format_script_file)
     endif
 endfunction
 
 function! ClangFormat()
     if &filetype == "c" || &filetype == "cpp"
-        pyf /usr/share/clang/clang-format-3.9/clang-format.py
+        execute "py3f " . fnameescape(g:clang_format_script_file)
     else
         echoerr "clang-format: Not a C/C++ source file!"
     endif
