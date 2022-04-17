@@ -138,5 +138,11 @@ let g:racer_experimental_completer = 1
 " Go
 Plugin 'fatih/vim-go'
 
+" TOML
+Plugin 'cespare/vim-toml'
+
+" Vala
+Plugin 'arrufat/vala.vim'
+
 call vundle#end()
 filetype plugin on
