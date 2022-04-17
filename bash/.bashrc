@@ -36,6 +36,9 @@ if [[ $(tty) =~ pts && $(tput colors) == 8 ]] ; then
     TERM=xterm-256color
 fi
 
+# Don't add duplicate commands, or commands starting with Space, to the history
+export HISTCONTROL=ignoreboth
+
 # Disable terminal flow control
 stty -ixon -ixoff
 
