@@ -20,11 +20,12 @@ endif
 " === Editor Setup ===
 
 " Colorscheme
+set background=dark
 if has('gui_running')
-    colorscheme evening
+    colorscheme PaperColor
 elseif (&t_Co == 256)
     " 256-color support
-    colorscheme evening
+    colorscheme PaperColor
 else
     " 8 colors :(
     colorscheme default
@@ -95,10 +96,6 @@ nnoremap <C-c>t :cscope find t <C-r>=expand('<cword>')<CR><CR>
 " Clear search highlighting quickly
 nnoremap <silent> <CR> :nohl<CR><CR>
 
-" Switch to the last active tab. g:lasttab is updated by TabLeave autocmd
-let g:lasttab = tabpagenr()
-nnoremap <silent> gl :exe "tabn ".g:lasttab<CR>
-
 " Switch between absolute and relative numbering
 nnoremap <silent> <C-n> :call ToggleLineNumberType()<CR>
 
@@ -111,8 +108,10 @@ vnoremap <silent> <Leader>f :call ClangFormat()<CR>
 inoremap UU <Esc>m`vbU``a
 
 " Comment shortcut (depends on the 'commentary' plugin by tpope)
-nmap - gcc
-vmap - gc
+if exists("g:loaded_commentary")
+    nmap - gcc
+    vmap - gc
+endif
 
 " Insert blank lines without leaving normal mode
 nnoremap oo o<Esc>
@@ -162,7 +161,8 @@ endfunction
 augroup vimrc_autocmds
     autocmd!
 
-    " md is definitely not modula2 >_>
+    " Vim's defaults recognize this extension as Modula-2, but it
+    " more commonly refers to Markdown these days
     autocmd BufNewFile,BufRead *.md set filetype=markdown
 
     " clang-format is a YAML file
@@ -170,9 +170,6 @@ augroup vimrc_autocmds
 
     " Trailing whitespace is generally bad (or at least invisible)
     autocmd WinEnter,BufEnter,InsertLeave * match Error /\s\+$/
-
-    " Save last active tab
-    autocmd TabLeave * let g:lasttab = tabpagenr()
 
     " Auto-format C source files on save if enabled (see
     " g:auto_clang_format_enable declared above)

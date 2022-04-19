@@ -40,7 +40,6 @@ Plugin 'itchyny/lightline.vim'
 
 " - Add relative path for active buffer
 " - Add smoother integration with CtrlP
-" - Disable tabline in favor of mkitt/tabline plugin
 let g:lightline = {
 \   'active': {
 \     'left': [ [ 'mode', 'paste' ],
@@ -54,11 +53,15 @@ let g:lightline = {
 \   },
 \   'enable': {
 \     'statusline': 1,
-\     'tabline': 0,
+\     'tabline': 1,
 \   },
+\   'colorscheme': 'PaperColor',
 \ }
 
 " Tell CtrlP to get its status lines from our custom functions
+"
+" The CtrlP integration is heavily based on the lightline author's suggested
+" settings in https://github.com/itchyny/lightline.vim/issues/16
 let g:ctrlp_status_func = {
             \ 'main': 'CtrlPStatusFunc_1',
             \ 'prog': 'CtrlPStatusFunc_2',
@@ -113,8 +116,32 @@ function! CtrlPStatusFunc_2(str)
     return lightline#statusline(0)
 endfunction
 
+" lightline no longer has support for reloading colorscheme when toggling the
+" 'background' option: see https://github.com/itchyny/lightline.vim/issues/194
+" The following is a workaround based on
+" https://github.com/itchyny/lightline.vim/issues/424#issuecomment-590058820
+" which manually re-sources the appropriate colorscheme file when the
+" background option value is set.
+function! LightlineReloadColors()
+    let colors_path =
+        \ 'autoload/lightline/colorscheme/' . g:lightline.colorscheme . '.vim'
+    execute 'source' globpath(&rtp, colors_path)
+    call lightline#colorscheme()
+    call lightline#update()
+endfunction
+augroup lightline_customizations
+    autocmd!
+    autocmd OptionSet background call LightlineReloadColors()
+augroup END
+
 " lightline renders showmode irrelevant
 set noshowmode
+
+" === Fugitive ===
+"
+" Git integration created by the one and only tpope
+
+Plugin 'tpope/vim-fugitive'
 
 " === Commentary ===
 "
@@ -122,11 +149,9 @@ set noshowmode
 
 Plugin 'tpope/vim-commentary'
 
-" === Tabline ===
-"
-" Nicely formatted tab line with tab numbers for easier navigation
+" === Colorschemes ===
 
-Plugin 'mkitt/tabline.vim'
+Plugin 'NLKNguyen/papercolor-theme'
 
 " === Language plugins ===
 
@@ -143,6 +168,9 @@ Plugin 'cespare/vim-toml'
 
 " Vala
 Plugin 'arrufat/vala.vim'
+
+" Python
+Plugin 'vim-python/python-syntax'
 
 call vundle#end()
 filetype plugin on
